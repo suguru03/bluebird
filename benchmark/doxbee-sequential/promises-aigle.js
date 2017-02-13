@@ -1,17 +1,17 @@
-global.useKew = true;
-
-var q = require('kew');
-
+global.useBluebird = false;
+global.useAigle = true;
+global.useQ = false;
+var aigle = require('aigle');
 require('../lib/fakesP');
 
 module.exports = function upload(stream, idOrPath, tag, done) {
     var blob = blobManager.create(account);
     var tx = db.begin();
-    var blobIdP = blob.put(stream); 
+    var blobIdP = blob.put(stream);
     var fileP = self.byUuidOrPath(idOrPath).get();
     var version, fileId, file;
-    q.all([blobIdP, fileP]).then(function(all) {        
-        var blobId = all[0], fileV = all[1];
+
+    aigle.join(blobIdP, fileP, function(blobId, fileV) {
         file = fileV;
         var previousId = file ? file.version : null;
         version = {
@@ -28,7 +28,7 @@ module.exports = function upload(stream, idOrPath, tag, done) {
             var splitPath = idOrPath.split('/');
             var fileName = splitPath[splitPath.length - 1];
             var newId = uuid.v1();
-            return self.createQueryCtxless(idOrPath, {
+            return self.createQuery(idOrPath, {
                 id: newId,
                 userAccountId: userAccount.id,
                 name: fileName,
