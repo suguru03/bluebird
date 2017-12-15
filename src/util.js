@@ -345,7 +345,7 @@ function getNativePromise() {
 }
 
 function contextBind(ctx, cb) {
-    if (typeof cb !== "function")
+    if (!ctx || typeof cb !== "function")
         return cb;
 
     if (ctx.domain != null) {
